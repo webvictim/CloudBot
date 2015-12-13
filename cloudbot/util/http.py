@@ -21,7 +21,7 @@ from urllib.error import URLError, HTTPError
 # security
 parser = etree.XMLParser(resolve_entities=False, no_network=True)
 
-ua_cloudbot = 'Cloudbot/DEV http://github.com/CloudDev/CloudBot'
+ua_cloudbot = 'Cloudbot/Jeeves http://github.com/CloudDev/CloudBot'
 
 ua_firefox = 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:17.0) Gecko/17.0' \
              ' Firefox/17.0'
@@ -30,6 +30,11 @@ ua_old_firefox = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; ' \
 ua_internetexplorer = 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)'
 ua_chrome = 'Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.4 (KHTML, ' \
             'like Gecko) Chrome/22.0.1229.79 Safari/537.4'
+
+ua_chrome_home = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36' \
+                ' KHTML, like Gecko) Chrome/46.0.2490.86 Safari/537.36'
+
+default_referer = 'https://www.snoonet.org/'
 
 jar = http.cookiejar.CookieJar()
 
@@ -68,7 +73,8 @@ def open(url, query_params=None, user_agent=None, post_data=None,
         query_params = {}
 
     if user_agent is None:
-        user_agent = ua_cloudbot
+        #user_agent = ua_cloudbot
+        user_agent = ua_chrome_home
 
     query_params.update(kwargs)
 
@@ -87,6 +93,10 @@ def open(url, query_params=None, user_agent=None, post_data=None,
 
     if referer is not None:
         request.add_header('Referer', referer)
+    else:
+        request.add_header('Referer', default_referer)
+
+    print(request.header_items())
 
     if cookies:
         opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))

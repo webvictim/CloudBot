@@ -53,6 +53,8 @@ def bing(text, bot):
         "$format": "json"
     }
 
+    print(params)
+
     request = requests.get(API_URL, params=params, auth=(api_key, api_key))
 
     # I'm not even going to pretend to know why results are in ['d']['results'][0]

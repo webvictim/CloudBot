@@ -64,7 +64,7 @@ def cb_think(text):
 	    return "Error: API returned "+str(parsed.status_code)
 
 
-@hook.command("ask", "cleverbot", "cb", "gonzobot")
+@hook.command("ask", "cleverbot", "cb", "Jeeves")
 def ask(text):
     """ <question> -- Asks Cleverbot <question> """
     return cb_think(text)
