@@ -2,6 +2,7 @@
 from cloudbot import hook
 from cloudbot.event import EventType
 from plugins import grab
+from plugins import lenny
 
 db_ready = []
 
@@ -61,6 +62,9 @@ def welcome(nick, action, message, chan, event, db, conn):
             if len(greet.split(' ')) >= 2:
                 text = greet.lower().split(' ')[1]
             out = grab.grabrandom(text, chan, message)
+            message(out, chan)
+        elif greet.lower().split(' ')[0] == ".flenny":
+            out = lenny.rawflenny()
             message(out, chan)
         else:
             message(welcome[0], chan)

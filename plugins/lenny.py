@@ -14,3 +14,11 @@ def lenny(message, conn):
 def flenny(message):
     """flenny is watching."""
     message(random.choice(flennyface))
+    
+def rawlenny():
+    """random lenny output for heralds"""
+    return random.choice(lennyface)
+
+def rawflenny():
+    """random flenny output for heralds"""
+    return random.choice(flennyface)
