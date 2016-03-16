@@ -243,16 +243,9 @@ class CloudBot:
             if event.chan.lower() == event.nick.lower():  # private message, no command prefix
                 command_re = r'(?i)^(?:[{}]?|{}[,;:]+\s+)(\w+)(?:$|\s+)(.*)'.format(command_prefix, event.conn.nick)
             else:
-                cmd_matches = []
-                cmd_match = None
-                for prefix in command_prefix:
-                    command_re = r'(?i)^(?:[{}]|{}[,;:]+\s+)(\w+)(?:$|\s+)(.*)'.format(prefix, event.conn.nick)
-                    cmd_matches.append(re.match(command_re, event.content))
+                command_re = r'(?i)^(?:[{}]|{}[,;:]+\s+)(\w+)(?:$|\s+)(.*)'.format(command_prefix, event.conn.nick)
 
-            for match in cmd_matches:
-                if match:
-                    cmd_match = match
-                    continue
+            cmd_match = re.match(command_re, event.content)
 
             if cmd_match:
                 command = cmd_match.group(1).lower()
