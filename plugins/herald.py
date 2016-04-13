@@ -44,6 +44,30 @@ def herald(text, nick, chan, db, conn):
         db.commit()
         return("greeting successfully added")
 
+@hook.command()
+def harold(text, nick, chan, db, conn):
+    """harold [message] adds a greeting for your nick that will be announced everytime you join the channel. Using .harold show will show your current harold and .harold delete will remove your greeting."""
+
+    db_init(db, conn.name)
+
+    if text.lower() == "show":
+        greeting = db.execute("select quote from herald where name = :name and chan = :chan", {
+                              'name': nick.lower(), 'chan': chan}).fetchone()
+        if greeting:
+            return greeting[0]
+        else:
+            return "you don't have a harold set try .harold <message> to set your greeting."
+    elif text.lower() in ["delete", "remove"]:
+        greeting = db.execute("select quote from herald where name = :name and chan = :chan", {
+                              'name': nick.lower(), 'chan': chan}).fetchone()[0]
+        db.execute("delete from herald where name = :name and chan = :chan", {'name': nick.lower(), 'chan': chan})
+        db.commit()
+        return ("greeting \'{}\' for {} has been removed".format(greeting, nick))
+    else:
+        db.execute("insert or replace into herald(name, chan, quote) values(:name, :chan, :quote)", {
+                   'name': nick.lower(), 'chan': chan, 'quote': text})
+        db.commit()
+        return("greeting successfully added")
 
 @hook.irc_raw("JOIN", singlethread=True)
 def welcome(nick, action, message, chan, event, db, conn):
