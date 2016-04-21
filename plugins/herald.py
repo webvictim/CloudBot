@@ -4,6 +4,8 @@ from cloudbot.event import EventType
 from plugins import grab
 from plugins import lenny
 
+import random
+
 db_ready = []
 
 
@@ -84,7 +86,8 @@ def welcome(nick, action, message, chan, event, db, conn):
         if greet.lower().split(' ')[0] == ".grabrandom":
             text = ""
             if len(greet.split(' ')) >= 2:
-                text = greet.lower().split(' ')[1]
+                candidates = greet.lower().split(' ')[1:]
+                text = random.choice(candidates)
             out = grab.grabrandom(text, chan, message)
             message(out, chan)
         elif greet.lower().split(' ')[0] == ".flenny":
