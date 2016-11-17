@@ -106,16 +106,18 @@ def seen(text, nick, chan, db, event, conn):
     if text.lower() == name:
         return "Have you looked in a mirror lately?"
 
-    channel_match = re.search("#.+$", text.lower())
-    if channel_match:
-        chan_to_check = channel_match.group(0)
-    else:
-        chan_to_check = chan
+    if not re.match("^[A-Za-z0-9_|\^\*\`.\-\]\[\{\}\\\\]*$", text.lower()):
+        return "I can't look up that name, its impossible to use!"
 
     db_init(db, conn.name)
 
-    last_seen = db.execute("select name, time, quote from seen_user where name like :name and chan = :chan",
-                           {'name': name, 'chan': chan_to_check}).fetchone()
+    if '_' in text:
+        text = text.replace("_", "/_")
+
+    last_seen = db.execute("select name, time, quote from seen_user where name like :name escape '/' and chan = :chan",
+                            {'name': text, 'chan': chan}).fetchone()
+
+    text = text.replace("/", "")
 
     if last_seen:
         reltime = timeformat.time_since(last_seen[1])

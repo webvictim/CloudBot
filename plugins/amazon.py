@@ -14,7 +14,8 @@ AMAZON_RE = re.compile(""".*ama?zo?n\.(com|co\.uk|com\.au|de|fr|ca|cn|es|it|in)/
 
 # Feel free to set this to None or change it to your own ID.
 # Or leave it in to support CloudBot, it's up to you!
-AFFILIATE_TAG = "cloudbot-20"
+# requsted to remove it by network
+AFFILIATE_TAG = ""
 
 
 @hook.regex(AMAZON_RE)
@@ -101,6 +102,6 @@ def amazon(text, _parsed=False):
 
     # finally, assemble everything into the final string, and return it!
     if not _parsed:
-        return colors.parse("$(b){}$(b) ({}) - {}{} - {}".format(title, price, rating_str, tag_str, url))
+        return colors.parse("".join("$(b){}$(b) ({}) - {}{} - {}".format(title, price, rating_str, tag_str, url).splitlines()))
     else:
-        return colors.parse("$(b){}$(b) ({}) - {}{}".format(title, price, rating_str, tag_str))
+        return eolors.parse("".join("$(b){}$(b) ({}) - {}{}".format(title, price, rating_str, tag_str).splitlines()))

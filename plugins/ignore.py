@@ -6,6 +6,7 @@ from sqlalchemy import Table, Column, UniqueConstraint, PrimaryKeyConstraint, St
 from cloudbot import hook
 from cloudbot.util import database
 
+logchannel = ""
 
 table = Table(
     "ignored",
@@ -92,7 +93,7 @@ def ignore_sieve(bot, event, _hook):
 
 
 @hook.command(permissions=["ignore"])
-def ignore(text, db, chan, conn, notice):
+def ignore(text, db, chan, conn, notice, message, nick):
     """<nick|mask> -- ignores all input from <nick|mask> in this channel."""
     target = text.lower()
     if "!" not in target or "@" not in target:
@@ -101,12 +102,14 @@ def ignore(text, db, chan, conn, notice):
     if is_ignored(conn.name, chan, target):
         notice("{} is already ignored in {}.".format(target, chan))
     else:
+        if logchannel:
+            message("{} used IGNORE to make me ignore {} in {}".format(nick, target, chan), logchannel)
         notice("{} has been ignored in {}.".format(target, chan))
         add_ignore(db, conn.name, chan, target)
 
 
 @hook.command(permissions=["ignore"])
-def unignore(text, db, chan, conn, notice):
+def unignore(text, db, chan, conn, notice, nick, message):
     """<nick|mask> -- un-ignores all input from <nick|mask> in this channel."""
     target = text.lower()
     if "!" not in target or "@" not in target:
@@ -115,12 +118,14 @@ def unignore(text, db, chan, conn, notice):
     if not is_ignored(conn.name, chan, target):
         notice("{} is not ignored in {}.".format(target, chan))
     else:
+        if logchannel:
+            message("{} used UNIGNORE to make me stop ignoring {} in {}".format(nick, target, chan), logchannel)
         notice("{} has been un-ignored in {}.".format(target, chan))
         remove_ignore(db, conn.name, chan, target)
 
 
-@hook.command(permissions=["ignore"])
-def global_ignore(text, db, conn, notice):
+@hook.command(permissions=["botcontrol"])
+def global_ignore(text, db, conn, notice, nick, message):
     """<nick|mask> -- ignores all input from <nick|mask> in ALL channels."""
     target = text.lower()
     if "!" not in target or "@" not in target:
@@ -130,11 +135,13 @@ def global_ignore(text, db, conn, notice):
         notice("{} is already globally ignored.".format(target))
     else:
         notice("{} has been globally ignored.".format(target))
+        if logchannel:
+            message("{} used GLOBAL_IGNORE to make me ignore {} everywhere".format(nick, target), logchannel)
         add_ignore(db, conn.name, "*", target)
 
 
-@hook.command(permissions=["ignore"])
-def global_unignore(text, db, conn, notice):
+@hook.command(permissions=["botcontrol"])
+def global_unignore(text, db, conn, notice, nick, message):
     """<nick|mask> -- un-ignores all input from <nick|mask> in ALL channels."""
     target = text.lower()
     if "!" not in target or "@" not in target:
@@ -144,4 +151,6 @@ def global_unignore(text, db, conn, notice):
         notice("{} is not globally ignored.".format(target))
     else:
         notice("{} has been globally un-ignored.".format(target))
+        if logchannel:
+            message("{} used GLOBAL_UNIGNORE to make me stop ignoring {} everywhere".format(nick, target), logchannel)
         remove_ignore(db, conn.name, "*", target)

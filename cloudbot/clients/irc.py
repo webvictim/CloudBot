@@ -15,11 +15,11 @@ irc_noprefix_re = re.compile(r"([^ ]*) (.*)")
 irc_netmask_re = re.compile(r"([^!@]*)!([^@]*)@(.*)")
 irc_param_re = re.compile(r"(?:^|(?<= ))(:.*|[^ ]+)")
 
-irc_bad_chars = ''.join([chr(x) for x in list(range(0, 32)) + list(range(127, 160))])
+irc_bad_chars = ''.join([chr(x) for x in list(range(0, 1)) + list(range(4, 32)) + list(range(127, 160))])
 irc_clean_re = re.compile('[{}]'.format(re.escape(irc_bad_chars)))
 
 def irc_clean(dirty):
-    return irc_clean_re.sub('', dirty)
+    return irc_clean_re.sub('',dirty)
 
 irc_command_to_event_type = {
     "PRIVMSG": EventType.message,
@@ -151,6 +151,7 @@ class IrcClient(Client):
 
     def message(self, target, *messages, sanatize=True):
         for text in messages:
+<<<<<<< HEAD
             if sanatize == True:
                 text = "".join(text.splitlines())
             self.cmd("PRIVMSG", target, text)
@@ -163,6 +164,17 @@ class IrcClient(Client):
     def notice(self, target, text, sanatize=True):
         if sanatize == True:
             text = "".join(text.splitlines())
+=======
+            text = "".join(text.splitlines())
+            self.cmd("PRIVMSG", target, text)
+
+    def action(self, target, text):
+        text = "".join(text.splitlines())
+        self.ctcp(target, "ACTION", text)
+
+    def notice(self, target, text):
+        text = "".join(text.splitlines())
+>>>>>>> 69e6622fdbcef05a96605d1d0788375e9b20c576
         self.cmd("NOTICE", target, text)
 
     def set_nick(self, nick):
@@ -352,6 +364,7 @@ class _IrcProtocol(asyncio.Protocol):
             if command_params:
                 if command_params[-1].startswith(":"):
                 # If the last param is in the format of `:content` remove the `:` from it, and set content from it
+<<<<<<< HEAD
                     content_raw = command_params[-1][1:]
                     content = irc_clean(content_raw)
                 else:
@@ -360,6 +373,13 @@ class _IrcProtocol(asyncio.Protocol):
                     if not command_params[-1]=="" and isinstance("string", type(command_params[-1])):
                         content = command_params[-1]
                         content_raw = command_params[-1]
+=======
+                content_raw = command_params[-1][1:]
+                content = irc_clean(content_raw)
+            else:
+                content_raw = None
+                content = None
+>>>>>>> 69e6622fdbcef05a96605d1d0788375e9b20c576
 
             # Event type
             if command in irc_command_to_event_type:

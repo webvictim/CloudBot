@@ -5,7 +5,6 @@ import cloudbot
 from cloudbot import hook
 from cloudbot.event import EventType
 
-
 # CTCP responses
 @asyncio.coroutine
 @hook.event(EventType.other)
