@@ -1,4 +1,4 @@
-gonzobot Command list
+Jeeves Command list
 ------
 **8ball (8, eightball):** &lt;question&gt; - asks the all knowing magic electronic eight ball &lt;question&gt;
 

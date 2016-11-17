@@ -11,7 +11,7 @@ search_pages = defaultdict(list)
 user_url = "http://reddit.com/user/{}/"
 subreddit_url = "http://reddit.com/r/{}/"
 # This agent should be unique for your cloudbot instance
-agent = {"User-Agent":"gonzobot a cloudbot (IRCbot) implementation for snoonet.org by /u/bloodygonzo"}
+agent = {"User-Agent":"Jeeves a cloudbot (IRCbot) implementation for snoonet.org by /u/webvictim"}
 
 
 def two_lines(bigstring, chan):
