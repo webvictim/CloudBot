@@ -13,8 +13,8 @@ from cloudbot.util import database
 from cloudbot.util import web
 
 duck = [" ε=ε=ε=ε=ε=┌(；　・＿・)┘ ", " ε=ε=ε=ε=ε=ε=┌(๑ʘ∀ʘ)┘ ", " ===≡≡≡｡ﾟ┌(ﾟ´Д`ﾟ)┘ﾟ｡ ", " ・・・・・・・ᕕ(╯°□°)ᕗ " ]
-duck_tail = ["[¬º-°]¬", "(▼皿▼)", "←~∋(｡Ψ▼ｰ▼)∈", "∋━━o(｀∀´oメ）～→", "(˼●̙̂ ̟ ̟̎ ̟ ̘●̂˻)", "(;´༎ຶД༎ຶ`)", "(((༼•̫͡•༽)))"]
-duck_noise = ["RUN!!!!!", "AHHHHHHHHHHH", "FFFFFUUUUUUU!"]
+duck_tail = ["[¬º-°]¬", "(▼皿▼)", "←~∋(｡Ψ▼ｰ▼)∈", "∋━━o(｀∀´oメ）～→", "(˼●̙̂ ̟ ̟̎ ̟ ̘●̂˻)", "(;´༎ຶД༎ຶ`)", "(((༼•̫͡•༽)))", "( ͡° ͜◯ ͡°)"]
+duck_noise = ["RUN!!!!!", "AHHHHHHHHHHH", "FFFFFUUUUUUU!", "THE CLOWNS ARE COMING!!!!!"]
 
 table = Table(
     'monster_hunt',
@@ -53,11 +53,13 @@ game_status structure
 }
 """
 
+MSG_DELAY = 10
+MASK_REQ = 3
 scripters = defaultdict(int)
 game_status = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
 
 
-@hook.on_start()
+#@hook.on_start()
 def load_optout(db):
     """load a list of channels duckhunt should be off in. Right now I am being lazy and not
     differentiating between networks this should be cleaned up later."""
@@ -68,6 +70,17 @@ def load_optout(db):
         for row in chans:
             chan = row["chan"]
             opt_out.append(chan)
+
+#@hook.event([EventType.message, EventType.action], singlethread=True)
+def incrementMsgCounter(event, conn):
+    """Increment the number of messages said in an active game channel. Also keep track of the unique masks that are speaking."""
+    global game_status
+    if event.chan in opt_out:
+        return
+    if game_status[conn.name][event.chan]['game_on'] == 1 and game_status[conn.name][event.chan]['duck_status'] == 0:
+        game_status[conn.name][event.chan]['messages'] += 1
+        if event.host not in game_status[conn.name][event.chan]['masks']:
+            game_status[conn.name][event.chan]['masks'].append(event.host)
 
 #@hook.command("starthunt", autohelp=False)
 def start_hunt(bot, chan, message, conn):
@@ -80,16 +93,19 @@ def start_hunt(bot, chan, message, conn):
     check = game_status[conn.name][chan]['game_on']
     if check:
         return "There is already a hunt running in {}.".format(chan)
-    #else:
-    #    game_status[conn.name][chan]['game_on'] = 1
-    #set_ducktime(chan, conn)
-    message("Thanks for participating in the 2015 monster hunt. The monster hunt has ended. To see the highest average score use '.monsterkillers average' or '.monsterfriends average'. For more information on this creepy event see https://redd.it/3q31qw", chan)
+    else:
+        game_status[conn.name][chan]['game_on'] = 1
+    set_ducktime(chan, conn)
+    message("Monsters have been spotted chasing people. Save the person and kill the monster with .bang, or try and befriend the monster and let it kill the person using .befriend. For more information on this creepy event see https://redd.it/56sqlx", chan)
 
 def set_ducktime(chan, conn):
     global game_status
     game_status[conn.name][chan]['next_duck_time'] = random.randint(int(time()) + 480, int(time()) + 3600)
     #game_status[conn.name][chan]['flyaway'] = game_status[conn.name][chan]['next_duck_time'] + 600
     game_status[conn.name][chan]['duck_status'] = 0
+    # let's also reset the number of messages said and the list of masks that have spoken.
+    game_status[conn.name][chan]['messages'] = 0
+    game_status[conn.name][chan]['masks'] = []
     return
 
 #@hook.command("stophunt", autohelp=False)
@@ -147,7 +163,9 @@ def deploy_duck(message, bot):
             active = game_status[network][chan]['game_on']
             duck_status = game_status[network][chan]['duck_status']
             next_duck = game_status[network][chan]['next_duck_time']
-            if active == 1 and duck_status == 0 and next_duck <= time():
+            chan_messages = game_status[network][chan]['messages']
+            chan_masks = game_status[network][chan]['masks']
+            if active == 1 and duck_status == 0 and next_duck <= time() and chan_messages >= MSG_DELAY and len(chan_masks) >= MASK_REQ:
                 #deploy a duck to channel
                 game_status[network][chan]['duck_status'] = 1
                 game_status[network][chan]['duck_time'] = time()
@@ -462,7 +480,7 @@ def hunt_opt_out(text, chan, db, conn):
         db.commit()
         load_optout(db)
 
-@hook.command("monstermerge", permissions=["botcontrol"])
+#@hook.command("monstermerge", permissions=["botcontrol"])
 def duck_merge(text, conn, db, message):
     """Moves the monster scores from one nick to another nick. Accepts two nicks as input the first will have their monster scores removed the second will have the first score added. Warning this cannot be undone."""
     oldnick, newnick = text.lower().split()

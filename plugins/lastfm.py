@@ -79,21 +79,22 @@ def lastfm(text, nick, db, bot, notice):
     tracks = response["recenttracks"]["track"]
 
     if type(tracks) == list:
-        # if the user is listening to something, the tracks entry is a list
-        # the first item is the current track
         track = tracks[0]
-        status = 'is listening to'
-        ending = '.'
-    elif type(tracks) == dict:
-        # otherwise, they aren't listening to anything right now, and
-        # the tracks entry is a dict representing the most recent track
-        track = tracks
-        status = 'last listened to'
-        # lets see how long ago they listened to it
-        time_listened = datetime.fromtimestamp(int(track["date"]["uts"]))
-        time_since = timeformat.time_since(time_listened)
-        ending = ' ({} ago)'.format(time_since)
 
+        if "@attr" in track and "nowplaying" in track["@attr"] and track["@attr"]["nowplaying"] == "true":
+            # if the user is listening to something, the first track (a dict) of the
+            # tracks list will contain an item with the "@attr" key.
+            # this item will will contain another item with the "nowplaying" key
+            # which value will be "true"
+            status = 'is listening to'
+            ending = '.'
+        else:
+            # otherwise, the user is not listening to anything right now
+            status = 'last listened to'
+            # lets see how long ago they listened to it
+            time_listened = datetime.fromtimestamp(int(track["date"]["uts"]))
+            time_since = timeformat.time_since(time_listened)
+            ending = ' ({} ago)'.format(time_since)
     else:
         return "error: could not parse track listing"
 
@@ -141,6 +142,10 @@ def getartisttags(artist, bot):
     request = requests.get(api_url, params = params)
     tags = request.json()
 
+    # if artist doesn't exist return no tags
+    if tags.get("error") == 6:
+        return "no tags"
+
     if 'tag' in tags['toptags']:
         for item in tags['toptags']['tag']:
             try:
@@ -178,6 +183,10 @@ def getusertrackplaycount(artist, track, user, bot):
             'track': track, 'username': user }
     request = requests.get(api_url, params = params)
     track_info = request.json()
+
+    # if track doesn't exist return 0 playcount
+    if track_info.get("error") == 6:
+        return 0
 
     return track_info['track'].get('userplaycount')
 
@@ -217,7 +226,7 @@ def displaybandinfo(text, nick, bot, notice):
     similar = getsimilarartists(text, bot)
     tags = getartisttags(text, bot)
 
-    out = "{} have {:,} plays and {:,} listeners.".format(text, int(a['stats']['playcount']),
+    out = "{} has {:,} plays and {:,} listeners.".format(text, int(a['stats']['playcount']),
             int(a['stats']['listeners']))
     out += " Similar artists include {}. Tags: ({}).".format(similar, tags)
 

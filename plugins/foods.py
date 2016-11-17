@@ -8,7 +8,7 @@ import re
 from cloudbot import hook
 from cloudbot.util import textgen
 
-nick_re = re.compile("^[A-Za-z0-9_|.\-\]\[\{\}]*$", re.I)
+nick_re = re.compile("^[A-Za-z0-9_|.\-\]\[\{\}\*]*$", re.I)
 
 cakes = ['Chocolate', 'Ice Cream', 'Angel', 'Boston Cream', 'Birthday', 'Bundt', 'Carrot', 'Coffee', 'Devils', 'Fruit',
          'Gingerbread', 'Pound', 'Red Velvet', 'Stack', 'Welsh', 'Yokan']
@@ -67,7 +67,8 @@ def load_foods(bot):
     """
     global sandwich_data, taco_data, coffee_data, noodles_data, muffin_data, \
         tea_data, keto_data, beer_data, cheese_data, pancake_data, chicken_data, \
-        icecream_data, brekkie_data, doobie_data, pizza_data, chocolate_data
+        icecream_data, brekkie_data, doobie_data, pizza_data, chocolate_data, pasta_data, \
+        nugget_data, cereal_data, pie_data
 
     with codecs.open(os.path.join(bot.data_dir, "sandwich.json"), encoding="utf-8") as f:
         sandwich_data = json.load(f)
@@ -101,6 +102,12 @@ def load_foods(bot):
 
     with codecs.open(os.path.join(bot.data_dir, "chicken.json"), encoding="utf-8") as f:
         chicken_data = json.load(f)
+        
+    with codecs.open(os.path.join(bot.data_dir, "nugget.json"), encoding="utf-8") as f:
+        nugget_data = json.load(f)
+        
+    with codecs.open(os.path.join(bot.data_dir, "pie.json"), encoding="utf-8") as f:
+        pie_data = json.load(f)
 		
     with codecs.open(os.path.join(bot.data_dir, "brekkie.json"), encoding="utf-8") as f:
         brekkie_data = json.load(f)
@@ -116,6 +123,12 @@ def load_foods(bot):
     
     with codecs.open(os.path.join(bot.data_dir, "chocolate.json"), encoding="utf-8") as f:
         chocolate_data = json.load(f)
+
+    with codecs.open(os.path.join(bot.data_dir, "pasta.json"), encoding="utf-8") as f:
+        pasta_data = json.load(f)
+    
+    with codecs.open(os.path.join(bot.data_dir, "cereal.json"), encoding="utf-8") as f:
+        cereal_data = json.load(f)
 		
 @asyncio.coroutine
 @hook.command
@@ -321,13 +334,41 @@ def pancake(text, action):
 @asyncio.coroutine
 @hook.command
 def chicken(text, action):
-    """<user> - give pancakes to <user>"""
+    """<user> - give chicken to <user>"""
     user = text.strip()
 
     if not is_valid(user):
-        return "I can't give pancakes to that user."
+        return "I can't give chicken to that user."
 
     generator = textgen.TextGenerator(chicken_data["templates"], chicken_data["parts"], variables={"user": user})
+
+    # act out the message
+    action(generator.generate_string())
+    
+@asyncio.coroutine
+@hook.command
+def nugget(text, action):
+    """<user> - give nuggets to <user>"""
+    user = text.strip()
+
+    if not is_valid(user):
+        return "I can't give nuggets to that user."
+
+    generator = textgen.TextGenerator(nugget_data["templates"], nugget_data["parts"], variables={"user": user})
+
+    # act out the message
+    action(generator.generate_string())
+    
+@asyncio.coroutine
+@hook.command
+def pie(text, action):
+    """<user> - give pie to <user>"""
+    user = text.strip()
+
+    if not is_valid(user):
+        return "I can't give pie to that user."
+
+    generator = textgen.TextGenerator(pie_data["templates"], pie_data["parts"], variables={"user": user})
 
     # act out the message
     action(generator.generate_string())
@@ -400,3 +441,31 @@ def chocolate(text, action):
     generator = textgen.TextGenerator(chocolate_data["templates"], chocolate_data["parts"], variables={"user": user})
     # act out the message
     action(generator.generate_string())
+
+@asyncio.coroutine
+@hook.command
+def pasta(text, action):
+    """<user> - give pasta to <user>"""
+    user = text.strip()
+
+    if not is_valid(user):
+        return "I can't give pasta to that user."
+
+    generator = textgen.TextGenerator(pasta_data["templates"], pasta_data["parts"], variables={"user": user})
+
+    # act out the message
+    action(generator.generate_string())
+
+@asyncio.coroutine
+@hook.command
+def cereal(text, action):
+    """<user> - give cereal to <user>"""
+    user = text.strip()
+
+    if not is_valid(user):
+        return "I can't give cereal to that user."
+
+    generator = textgen.TextGenerator(cereal_data["templates"], cereal_data["parts"], variables={"user": user})
+
+    # act out the message
+    action(generator.generate_string())    

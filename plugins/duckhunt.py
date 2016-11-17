@@ -442,7 +442,7 @@ def duckforgive(text):
     else:
         return "I couldn't find anyone banned from the hunt by that nick"
 
-#@hook.command("hunt_opt_out", permissions=["op", "ignore"], autohelp=False)
+@hook.command("hunt_opt_out", permissions=["op", "ignore"], autohelp=False)
 def hunt_opt_out(text, chan, db, conn):
     """Running this command without any arguments displays the status of the current channel. hunt_opt_out add #channel will disable all duck hunt commands in the specified channel. hunt_opt_out remove #channel will re-enable the game for the specified channel."""
     if not text:
@@ -539,6 +539,10 @@ def ducks_user(text, nick, chan, conn, db, message):
     scores = db.execute(select([table.c.name, table.c.chan, table.c.shot, table.c.befriend])
         .where(table.c.network == conn.name)
         .where(table.c.name == name)).fetchall()
+    if text:
+        name = text.split()[0]
+    else:
+        name = nick
     if scores:
         for row in scores:
             if row["chan"].lower() == chan.lower():
