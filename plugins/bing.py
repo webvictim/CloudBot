@@ -70,7 +70,8 @@ def bing(text, bot):
     desc = formatting.truncate(unescape(result["Description"]), 150)
     url = unescape(result["Url"])
 
-    return colors.parse('\x02Notice: The Bing API will stop working sometime in december because Microsoft is greedy as fuck and is removing the free search tier.\x02  {} -- $(b){}$(b): "{}"'.format(url, title, desc))
+    #return colors.parse('\x02Notice: The Bing API will stop working sometime in december because Microsoft is greedy as fuck and is removing the free search tier.\x02  {} -- $(b){}$(b): "{}"'.format(url, title, desc))
+    return colors.parse('{} -- $(b){}$(b): "{}"'.format(url, title, desc))
 
 
 @hook.command("bingimage", "bis")

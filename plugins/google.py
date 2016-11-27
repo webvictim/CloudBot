@@ -25,7 +25,7 @@ def googleimage(text):
     return random.choice(parsed['responseData']['results'][:10])['unescapedUrl']
 
 
-@hook.command("google", "g", "search")
+#@hook.command("google", "g", "search")
 def google(text, bot):
     """<query> - returns the first google search result for <query>"""
 
