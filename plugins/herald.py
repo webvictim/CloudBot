@@ -6,6 +6,8 @@ from plugins import lenny
 
 import random
 
+import random
+
 db_ready = []
 
 
