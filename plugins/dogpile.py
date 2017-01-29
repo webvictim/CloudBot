@@ -11,7 +11,8 @@ HEADERS = {'User-Agent': 'Mozilla/5.0 (Linux; Android 4.0.4; Galaxy Nexus Build/
 
 opt_out = []
 
-@hook.command("dpis", "gis")
+#@hook.command("dpis", "gis")
+@hook.command("dpis")
 def dogpileimage(text, chan):
     """Uses the dogpile search engine to search for images."""
     if chan in opt_out:
@@ -27,7 +28,8 @@ def dogpileimage(text, chan):
     image = parse.unquote(parse.unquote(random.choice(linklist)).split('ru=')[1].split('&')[0])
     return image
 
-@hook.command("dp", "g", "dogpile")
+#@hook.command("dp", "g", "dogpile")
+@hook.command("dp", "dogpile")
 def dogpile(text, chan):
     """Uses the dogpile search engine to find shit on the web."""
     if chan in opt_out:
