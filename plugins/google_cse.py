@@ -56,7 +56,8 @@ def gse(text):
     return u'{} -- \x02{}\x02: "{}"'.format(result['link'], title, content)
 
 #@hook.command('gseis', 'image')
-@hook.command('gseis', 'image', 'gis')
+#@hook.command('gseis', 'image', 'gis')
+@hook.command('gseis', 'gis')
 def gse_gis(text):
     """<query> -- Returns first Google Images result for <query>."""
     if not dev_key:
