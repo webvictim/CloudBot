@@ -70,12 +70,13 @@ def find_location(location):
     if error:
         raise APIError(error)
     
-    formatted_address = json['results'][0]['formatted_address']
+    first_result = json['results'][0]
+    formatted_address = first_result['formatted_address']
     if formatted_address:
         if formatted_address.endswith(", USA"):
             return formatted_address.replace(", USA", "")
+        return formatted_address
 
-    first_result = json['results'][0]
     location_data = first_result['geometry']['location']
     return "{lat},{lng}".format(**location_data)
 
