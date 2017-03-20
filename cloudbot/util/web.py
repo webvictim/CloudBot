@@ -21,6 +21,7 @@ import requests
 
 #DEFAULT_SHORTENER = 'is.gd'
 DEFAULT_SHORTENER = 'goo.gl'
+GOOGL_KEY = 'AIzaSyBZt5PTK8VNHGF5EJEQHPEtuD4kYjm_mYo'
 DEFAULT_PASTEBIN = 'hastebin'
 
 HASTEBIN_SERVER = 'http://hastebin.com'
@@ -51,12 +52,14 @@ def pyeval(code, pastebin=True):
 def shorten(url, custom=None, key=None, service=DEFAULT_SHORTENER):
     impl = shorteners[service]
     if service == 'goo.gl':
-        key = 'AIzaSyByV3fmB9YlDQeKuLDEZgeH0af6CxV5-8k'
+        key = GOOGL_KEY
     return impl.shorten(url, custom, key)
 
 
 def try_shorten(url, custom=None, key=None, service=DEFAULT_SHORTENER):
     impl = shorteners[service]
+    if service == 'goo.gl':
+        key = GOOGL_KEY
     return impl.try_shorten(url, custom, key)
 
 
