@@ -38,4 +38,4 @@ def stock(text):
 
     data['color'] = "04" if float(data['change']) < 0 else "03"
 
-    return "{symbol} ({name}): {price} \x03{color}{change} ({percent_change})\x03 - ".format(**data) + link_url + symbol
+    return "{symbol} ({name}): {price:.2f} \x03{color}{change} ({percent_change})\x03 - ".format(**data) + link_url + symbol
