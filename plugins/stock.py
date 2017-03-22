@@ -4,8 +4,8 @@ import requests
 from cloudbot import hook
 
 # See http://www.jarloo.com/yahoo_finance/ for field names.
-field_names = ['symbol', 'name', 'ask', 'change', 'percent_change']
-query_url = "http://finance.yahoo.com/d/quotes.csv?f=snac1p2"
+field_names = ['symbol', 'name', 'previous_close', 'change', 'percent_change']
+query_url = "http://finance.yahoo.com/d/quotes.csv?f=snpc1p2"
 link_url = "https://finance.yahoo.com/quote/"
 
 
@@ -17,6 +17,8 @@ def get_ticker_data(symbol):
 
     if result['name'] == "N/A":
         return None
+
+    result['price'] = float(result['previous_close']) + float(result['change'])
 
     return result
 
@@ -36,4 +38,4 @@ def stock(text):
 
     data['color'] = "04" if float(data['change']) < 0 else "03"
 
-    return "{symbol} ({name}): {ask} \x03{color}{change} ({percent_change})\x03 - ".format(**data) + link_url + symbol
+    return "{symbol} ({name}): {price} \x03{color}{change} ({percent_change})\x03 - ".format(**data) + link_url + symbol
