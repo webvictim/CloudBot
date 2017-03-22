@@ -6,6 +6,8 @@ from sqlalchemy import Table, Column, String, Boolean, DateTime
 from sqlalchemy.sql import select
 from cloudbot import hook
 from cloudbot.util import database
+from cloudbot.event import EventType
+import time
 
 search_pages = defaultdict(list)
 search_page_indexes = {}
@@ -18,6 +20,16 @@ table = Table(
     Column('quote', String),
     Column('chan', String)
 )
+
+# override global log for channel-specific stuff
+nested_autodict = lambda: defaultdict(nested_autodict)
+last_log = nested_autodict()
+@hook.event(EventType.message, singlethread=True)
+def on_message(conn, nick, chan, content):
+    message_time = time.time()
+    if content.startswith("\x01ACTION ") and content.endswith("\x01"):
+        content = content[8:-1]
+    last_log[conn][chan][nick] = content
 
 @hook.on_start()
 def load_cache(db):
@@ -99,19 +111,21 @@ def grab(text, nick, chan, db, conn):
     if text.lower() == nick.lower():
         return "Didn't your mother teach you not to grab yourself?"
 
-    for item in conn.history[chan].__reversed__():
-        name, timestamp, msg = item
+    #for item in conn.history[chan].__reversed__():
+    #for item in last_log[conn][chan][nick]:
+    name = text
+    if last_log[conn][chan][name] != "":
+        timestamp = time.time()
+        msg = last_log[conn][chan][name]
         if text.lower() == name.lower():
             # check to see if the quote has been added
             if check_grabs(name.lower(), msg, chan):
                 return "I already have that quote from {} in the database".format(text)
-                break
             else:
                 # the quote is new so add it to the db.
-                grab_add(name.lower(),timestamp, msg, chan, db, conn)
+                grab_add(name.lower(), timestamp, msg, chan, db, conn)
                 if check_grabs(name.lower(), msg, chan):
                     return "the operation succeeded."
-                break
     return "I couldn't find anything from {} in recent history.".format(text)
 
 def format_grab(name, quote):
