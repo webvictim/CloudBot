@@ -131,6 +131,16 @@ def fullwidth(text):
     )
     return text.translate(HALFWIDTH_TO_FULLWIDTH)
 
+@hook.command("caps", "smallcaps")
+def smallcaps(text):
+    """<string> -- Converts <string> to small caps."""
+    HALFWIDTH_TO_SMALLCAPS = str.maketrans(
+        '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%&()*+,-./:;<=>?@[]^_`{|}~',
+        #'０１２３４５６７８９ᴀʙᴄᴅᴇғɢʜɪᴊᴋʟᴍɴᴏᴘǫʀsᴛᴜᴠᴡxʏᴢＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ！゛＃＄％＆（）＊＋、ー。／：；〈＝〉？＠［］＾＿‘｛｜｝～'
+        '０１２３４５６７８９ᴀʙᴄᴅᴇғɢʜɪᴊᴋʟᴍɴᴏᴘǫʀsᴛᴜᴠᴡxʏᴢᴀʙᴄᴅᴇғɢʜɪᴊᴋʟᴍɴᴏᴘǫʀsᴛᴜᴠᴡxʏᴢ！゛＃＄％＆（）＊＋、ー。／：；〈＝〉？＠［］＾＿‘｛｜｝～'
+    )
+    return text.translate(HALFWIDTH_TO_SMALLCAPS)
+
 # encoding
 
 @hook.command("rot13")
