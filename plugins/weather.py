@@ -65,6 +65,8 @@ def find_location(location):
         params['region'] = bias
 
     json = requests.get(geocode_api, params=params).json()
+    print("Google geocode request, {0}".format(params))
+    print(json)
 
     error = check_status(json['status'])
     if error:
@@ -72,10 +74,10 @@ def find_location(location):
     
     first_result = json['results'][0]
     formatted_address = first_result['formatted_address']
-    if formatted_address:
-        if formatted_address.endswith(", USA"):
-            return formatted_address.replace(", USA", "")
-        return formatted_address
+    #if formatted_address:
+    if formatted_address.endswith(", USA"):
+        return formatted_address.replace(", USA", "")
+    #    return formatted_address
 
     location_data = first_result['geometry']['location']
     return "{lat},{lng}".format(**location_data)
@@ -144,7 +146,10 @@ def weather(text, reply, db, nick, notice):
         return e
 
     url = wunder_api.format(wunder_key, formatted_location)
+    print(url)
+
     response = requests.get(url).json()
+    print(response)
 
     if response['response'].get('error'):
         return "{}".format(response['response']['error']['description'])
