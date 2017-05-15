@@ -29,7 +29,7 @@ def on_message(conn, nick, chan, content):
     message_time = time.time()
     if content.startswith("\x01ACTION ") and content.endswith("\x01"):
         content = content[8:-1]
-    last_log[conn][chan][nick] = content
+    last_log[conn][chan][nick.lower()] = content
 
 @hook.on_start()
 def load_cache(db):
@@ -113,7 +113,7 @@ def grab(text, nick, chan, db, conn):
 
     #for item in conn.history[chan].__reversed__():
     #for item in last_log[conn][chan][nick]:
-    name = text
+    name = text.lower()
     if last_log[conn][chan][name] != "":
         timestamp = time.time()
         msg = last_log[conn][chan][name]
