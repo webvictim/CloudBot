@@ -141,6 +141,17 @@ def smallcaps(text):
     )
     return text.translate(HALFWIDTH_TO_SMALLCAPS)
 
+@hook.command("caps1", "smallcaps1")
+def smallcaps(text):
+    """<string> -- Converts <string> to small caps with one space between each letter."""
+    HALFWIDTH_TO_SMALLCAPS = str.maketrans(
+        '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%&()*+,-./:;<=>?@[]^_`{|}~',
+        #'０１２３４５６７８９ᴀʙᴄᴅᴇғɢʜɪᴊᴋʟᴍɴᴏᴘǫʀsᴛᴜᴠᴡxʏᴢＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ！゛＃＄％＆（）＊＋、ー。／：；〈＝〉？＠［］＾＿‘｛｜｝～'
+        '０１２３４５６７８９ᴀʙᴄᴅᴇғɢʜɪᴊᴋʟᴍɴᴏᴘǫʀsᴛᴜᴠᴡxʏᴢᴀʙᴄᴅᴇғɢʜɪᴊᴋʟᴍɴᴏᴘǫʀsᴛᴜᴠᴡxʏᴢ！゛＃＄％＆（）＊＋、ー。／：；〈＝〉？＠［］＾＿‘｛｜｝～'
+    )
+    return " ".join([x for x in text.translate(HALFWIDTH_TO_SMALLCAPS)])
+
+
 # encoding
 
 @hook.command("rot13")
