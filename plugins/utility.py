@@ -128,7 +128,7 @@ def swapcase(text):
     """<string> -- Swaps the capitalization of <string>."""
     return text.swapcase()
 
-@hook.command("aesthetic", "vapor", "fw")
+@hook.command("aesthetic", "vapor", "fw", "aes")
 def fullwidth(text):
     """<string> -- Converts <string> to full width characters."""
     HALFWIDTH_TO_FULLWIDTH = str.maketrans(
@@ -146,6 +146,11 @@ def smallcaps(text):
 def smallcaps_space(text):
     """<string> -- Converts <string> to small caps with one space between each letter."""
     return " ".join([x for x in text.translate(HALFWIDTH_TO_SMALLCAPS)])
+
+@hook.command("caps2", "smallcaps2")
+def smallcaps_twospace(text):
+    """<string> -- Converts <string> to small caps with two spaces between each letter."""
+    return "  ".join([x for x in text.translate(HALFWIDTH_TO_SMALLCAPS)])
 
 # encoding
 
