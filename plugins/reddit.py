@@ -47,9 +47,25 @@ def reddit_url(match, bot):
     if "redd.it" in url:
         url = "http://" + url
         response = requests.get(url)
-        url = response.url + "/.json"
-    if not urllib.parse.urlparse(url).scheme:
-        url = "http://" + url + "/.json"
+        url = response.url
+    else:
+        url = "https://" + url
+
+    parsed_url = urllib.parse.urlparse(url)
+
+    new_path = parsed_url.path
+    if new_path.endswith("/"):
+        new_path += ".json"
+    elif not new_path.endswith("/.json"):
+        new_path += "/.json"
+
+    json_url_parts = tuple(list([
+        parsed_url.scheme if parsed_url.scheme else "https",
+        parsed_url.netloc,
+        new_path,
+        parsed_url.params, parsed_url.query, parsed_url.fragment]))
+
+    url = urllib.parse.urlunparse(json_url_parts)
 
     # the reddit API gets grumpy if we don't include headers
     headers = {'User-Agent': bot.user_agent}
