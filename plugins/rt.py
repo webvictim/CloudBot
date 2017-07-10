@@ -384,7 +384,7 @@ def rtg(text, db):
     for info in infos:
         if not info["tomato_meter"]:
             return "Could not find a critic score for {} ({}) - {}".format(
-                info["title"], info["release_year"], link)
+                info["title"], info["release_year"], info["link"])
  
     if len(infos) == 1:
         return "{} ({}) has a critic score of {} - {}".format(
