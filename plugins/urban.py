@@ -43,7 +43,7 @@ def urban(text):
 
         page = request.json()
 
-        if page['result_type'] == 'no_results':
+        if ('result_type' in page and page['result_type'] == 'no_results') or not len(page['list']):
             return 'Not found.'
     else:
         # get a random definition!
