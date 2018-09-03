@@ -2,11 +2,17 @@ import re
 import html
 
 from cloudbot import hook
-from cloudbot.util import http
+from cloudbot.util import web, http
 
 
-twitch_re = re.compile(r'(.*:)//(twitch.tv|www.twitch.tv)(:[0-9]+)?(.*)', re.I)
-multitwitch_re = re.compile(r'(.*:)//(www.multitwitch.tv|multitwitch.tv)/(.*)', re.I)
+twitch_re = re.compile(r'https?://(?:www\.)?twitch.tv/(\w+)/?(?:\s|$)', re.I)
+twitch_clip_re = re.compile(r'https?://clips.twitch.tv/(\w+)', re.I)
+
+
+@hook.on_start()
+def load_api(bot):
+    global client_id
+    client_id = bot.config.get("api_keys", {}).get("twitch_client_id")
 
 
 def test_name(s):
@@ -14,82 +20,90 @@ def test_name(s):
     return set(s) <= valid
 
 
-def twitch_lookup(location):
-    locsplit = location.split("/")
-    if len(locsplit) > 1 and len(locsplit) == 3:
-        channel = locsplit[0]
-        _type = locsplit[1]  # should be b or c
-        _id = locsplit[2]
-    else:
-        channel = locsplit[0]
-        _type = None
-        _id = None
-    fmt = "{}: {} playing {} ({})"  # Title: nickname playing Game (x views)
-    if _type and _id:
-        if _type == "b":  # I haven't found an API to retrieve broadcast info
-            soup = http.get_soup("http://twitch.tv/" + location)
-            title = soup.find('span', {'class': 'real_title js-title'}).text
-            playing = soup.find('a', {'class': 'game js-game'}).text
-            views = soup.find('span', {'id': 'views-count'}).text + " view"
-            views = views + "s" if not views[0:2] == "1 " else views
-            return html.unescape(fmt.format(title, channel, playing, views))
-        elif _type == "c":
-            data = http.get_json("https://api.twitch.tv/kraken/videos/" + _type + _id)
-            title = data['title']
-            playing = data['game']
-            views = str(data['views']) + " view"
-            views = views + "s" if not views[0:2] == "1 " else views
-            return html.unescape(fmt.format(title, channel, playing, views))
-    else:
-        data = http.get_json("https://api.twitch.tv/kraken/streams?channel=" + channel)
-        if data["streams"]:
-            title = data["streams"][0]["channel"]["status"]
-            playing = data["streams"][0]["game"]
-            v = data["streams"][0]["viewers"]
-            viewers = "\x033\x02Online now!\x02\x0f " + str(v) + " viewer" + ("s" if v != 1 else "")
-            return html.unescape(fmt.format(title, channel, playing, viewers))
-        else:
-            try:
-                data = http.get_json("https://api.twitch.tv/kraken/channels/" + channel)
-            except Exception:
-                return "Unable to get channel data. Maybe channel is on justin.tv instead of twitch.tv?"
-            title = data['status']
-            playing = data['game']
-            viewers = "\x034\x02Offline\x02\x0f"
-            return html.unescape(fmt.format(title, channel, playing, viewers))
+def twitch_lookup(channel):
+    headers = { "Client-ID": client_id }
+    data = http.get_json("https://api.twitch.tv/kraken/streams?channel=" + channel, headers=headers)
+
+    if data["streams"]:
+        return {
+            "title": data["streams"][0]["channel"]["status"],
+            "game": data["streams"][0]["game"],
+            "view_count": data["streams"][0]["viewers"],
+            "channel": channel,
+            "url": "http://twitch.tv/" + channel,
+            "live": True,
+        }
+
+    data = http.get_json("https://api.twitch.tv/kraken/channels/" + channel, headers=headers)
+    return {
+        "title": data['status'],
+        "game":  data['game'],
+        "channel": channel,
+        "url": "http://twitch.tv/" + channel,
+        "live": False,
+    }
 
 
-@hook.regex(multitwitch_re)
-def multitwitch_url(match):
-    usernames = match.group(3).split("/")
-    out = ""
-    for i in usernames:
-        if not test_name(i):
-            print("Not a valid username")
-            return None
-        if out == "":
-            out = twitch_lookup(i)
-        else:
-            out = out + " \x02|\x02 " + twitch_lookup(i)
-    return out
+def pretty_status(channel):
+    try:
+        data = twitch_lookup(channel)
+    except Exception as e:
+        return str(e)
+
+    if data['live']:
+        return "{} is \x0303online\x03 with {} viewer{} playing \x0306{}\x03: {} - {}".format(
+            data['channel'],
+            data['view_count'],
+            "s" if data['view_count'] != 1 else "",
+            data['game'],
+            data['title'],
+            data['url'])
+
+    return "{} is \x0304offline\x03, previously playing \x0306{}\x03: {} - {}".format(
+        data['channel'],
+        data['game'],
+        data['title'],
+        data['url'])
+
+
+def pretty_clip_info(slug):
+    try:
+        headers = {
+            "Accept": "application/vnd.twitchtv.v5+json",
+            "Client-ID": client_id
+        }
+        data = http.get_json("https://api.twitch.tv/kraken/clips/" + slug, headers=headers)
+    except Exception as e:
+        return str(e)
+
+    broadcaster_info = "\x02{}\x02".format(data["broadcaster"]["display_name"])
+    if data["game"]:
+        broadcaster_info += " playing \x02{}\x02".format(data["game"])
+
+    vod_info=""
+    if "vod" in data and data["vod"] and "url" in data["vod"]:
+        vod_info = " - vod: {}".format(web.try_shorten(data["vod"]["url"]))
+
+    return "\x02{}\x02 - {} - \x02{}s\x02{}".format(
+        data["title"], broadcaster_info, int(data["duration"]), vod_info)
 
 
 @hook.regex(twitch_re)
 def twitch_url(match):
-    bit = match.group(4).split("#")[0]
-    location = "/".join(bit.split("/")[1:])
-    if not test_name(location):
-        print("Not a valid username")
-        return None
-    return twitch_lookup(location)
+    channel = match.group(1)
+    return pretty_status(channel)
+
+
+@hook.regex(twitch_clip_re)
+def twitch_clip_url(match):
+    slug = match.group(1)
+    return pretty_clip_info(slug)
 
 
 @hook.command('twitch', 'twitchtv')
 def twitch(text):
-    """<channel name> -- Retrieves the channel and shows it's offline/offline status"""
-    text = text.split("/")[-1]
-    if test_name(text):
-        location = text
-    else:
+    """<channel name> -- Retrieves the channel and shows its status"""
+    if not test_name(text):
         return "Not a valid channel name."
-    return twitch_lookup(location).split("(")[-1].split(")")[0].replace("Online now! ", "")
+
+    return pretty_status(text)
